@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation System</title>
+    <!-- Bootstrap CDN link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        body {
+            background: url('moviebackground.jpg') center center fixed;
+            background-size: cover;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .jumbotron {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="jumbotron">
+            <h1 class="display-4">Movie Recommendation System</h1>
+            <p class="lead">Enter a movie title to get personalized recommendations.</p>
+            <form id="recommendForm">
+                <div class="form-group">
+                    <label for="movieTitle">Movie Title:</label>
+                    <input type="text" class="form-control" id="movieTitle" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Get Recommendations</button>
+            </form>
+        </div>
+        <div id="recommendations" class="mt-4"></div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js CDN links -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+
+    <script>
+        document.getElementById('recommendForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var movieTitle = document.getElementById('movieTitle').value;
+            fetch('/recommend', {
+                method: 'POST',
+                body: new URLSearchParams({ 'movie_title': movieTitle }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                var recommendationsDiv = document.getElementById('recommendations');
+                recommendationsDiv.innerHTML = '';
+                if (data.status === 'success') {
+                    var recommendationsList = document.createElement('ul');
+                    data.recommendations.forEach(function(recommendation) {
+                        var listItem = document.createElement('li');
+                        listItem.textContent = recommendation;
+                        recommendationsList.appendChild(listItem);
+                    });
+                    recommendationsDiv.appendChild(recommendationsList);
+                } else {
+                    var errorDiv = document.createElement('div');
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.color = 'red';
+                    recommendationsDiv.appendChild(errorDiv);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
